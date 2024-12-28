@@ -4,9 +4,11 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { APP_INTERCEPTOR } from '@nestjs/core';
+import { QuestionModule } from './question/question.module';
+import { AnswerModule } from './answer/answer.module';
 
 @Module({
-  imports: [AuthModule, UserModule],
+  imports: [AuthModule, UserModule, QuestionModule, AnswerModule],
   controllers: [AppController],
   providers: [
     AppService,

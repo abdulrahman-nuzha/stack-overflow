@@ -21,4 +21,29 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now()) @updatedAt
 
+  questions Question[] @relation("UserQuestions")
+  answers   Answer[]   @relation("UserAnswers")
+}
+
+model Question {
+  id        Int       @id @default(autoincrement())
+  title     String
+  body      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  userId    Int
+  user      User      @relation("UserQuestions", fields: [userId], references: [id])
+  answers   Answer[]
+}
+
+
+model Answer {
+  id        Int       @id @default(autoincrement())
+  body      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @default(now()) @updatedAt
+  questionId Int
+  userId    Int
+  question  Question  @relation(fields: [questionId], references: [id])
+  user      User      @relation("UserAnswers", fields: [userId], references: [id])
 }
