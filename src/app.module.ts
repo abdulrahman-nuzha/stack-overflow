@@ -7,9 +7,10 @@ import { APP_INTERCEPTOR } from '@nestjs/core';
 import { QuestionModule } from './question/question.module';
 import { AnswerModule } from './answer/answer.module';
 import { EditModule } from './edit/edit.module';
+import { VoteModule } from './vote/vote.module';
 
 @Module({
-  imports: [AuthModule, UserModule, QuestionModule, AnswerModule, EditModule],
+  imports: [AuthModule, UserModule, QuestionModule, AnswerModule, EditModule, VoteModule],
   controllers: [AppController],
   providers: [
     AppService,
