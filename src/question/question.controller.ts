@@ -37,6 +37,14 @@ export class QuestionController {
     return this.questionService.findAll(query);
   }
 
+  @ApiOperation({ summary: 'Search with similarity' })
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  @Get('/search')
+  searchWithSimilarity(@Query() search) {
+    return this.questionService.searchWithSimilarity(search);
+  }
+
   @ApiOperation({ summary: 'Get question by id' })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')

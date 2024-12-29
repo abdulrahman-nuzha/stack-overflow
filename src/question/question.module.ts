@@ -6,6 +6,8 @@ import { AiService } from 'src/ai/ai.service';
 import { PineconeService } from 'src/pinecone/pinecone.service';
 import { EmbeddingService } from 'src/embedding/embedding.service';
 import { Pinecone } from '@pinecone-database/pinecone';
+import { RerankerService } from 'src/reranker/reranker.service';
+import { CohereClient } from 'cohere-ai/Client';
 
 @Module({
   providers: [
@@ -15,6 +17,8 @@ import { Pinecone } from '@pinecone-database/pinecone';
     PineconeService,
     EmbeddingService,
     Pinecone,
+    RerankerService,
+    CohereClient
   ],
   controllers: [QuestionController],
 })

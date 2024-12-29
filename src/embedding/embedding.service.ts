@@ -16,9 +16,7 @@ export class EmbeddingService {
         headers: { Authorization: `Bearer ${this.apiKey}` },
       },
     );
-
-    // The response is usually a nested list, we might need to flatten/average.
-    // E.g. response.data = [[ vector_of_numbers ]]
+      
     const embeddings: number[] = response.data;    
     return embeddings;
   }

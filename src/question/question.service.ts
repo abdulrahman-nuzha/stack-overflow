@@ -6,6 +6,7 @@ import { UpdateQuestionDto } from './dto/update-question.dto';
 import { GetQuestionDto } from './dto/get-question.dto';
 import { AiService } from 'src/ai/ai.service';
 import { PineconeService } from 'src/pinecone/pinecone.service';
+import { RerankerService } from 'src/reranker/reranker.service';
 
 interface CreateData {
   title: string;
@@ -23,6 +24,7 @@ export class QuestionService {
     private prisma: PrismaService,
     private readonly aiService: AiService,
     private readonly pineconeService: PineconeService,
+    protected readonly rerankerService: RerankerService,
   ) {}
 
   async create(CreateQuestionDto: CreateQuestionDto, req) {
@@ -38,7 +40,7 @@ export class QuestionService {
       try {
         const prompt = `###title: ${question.title} \n ###body: ${question.body}`;
         const answer = await this.aiService.generateAnswer(prompt);
-  
+
         await this.prisma.answer.create({
           data: {
             body: answer,
@@ -46,8 +48,8 @@ export class QuestionService {
             questionId: question.id,
           },
         });
-  
-        await this.pineconeService.upsert(`${question.id}`, question.body);
+
+        await this.pineconeService.upsert(`${question.id}`, question.title);
       } catch (error) {
         console.error('Error processing background task:', error);
       }
@@ -111,6 +113,37 @@ export class QuestionService {
         totalPages,
       },
     };
+  }
+
+  async searchWithSimilarity(query) {
+    if (!query.search) {
+      throw new HttpException(
+        'Search paramter is required',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const result = await this.pineconeService.findSimilarQuestions(
+      query.search,
+    );
+
+    const ids = result.map((item) => parseInt(item.id));
+
+    const data = await this.prisma.question.findMany({
+      where: {
+        id: { in: ids },
+      },
+    });
+    const doc = data.map((item) => item.title);
+    const rerank = await this.rerankerService.rerankQuestions(
+      query.search,
+      doc,
+    );
+    console.log(doc);
+
+    const reorderedList = rerank.results.map((item) => data[item.index]);
+
+    return reorderedList;
   }
 
   async findOne(id: number) {

@@ -5,6 +5,7 @@ import { AiService } from 'src/ai/ai.service';
 import { PineconeService } from 'src/pinecone/pinecone.service';
 import { EmbeddingService } from 'src/embedding/embedding.service';
 import { Pinecone } from '@pinecone-database/pinecone';
+import { RerankerService } from 'src/reranker/reranker.service';
 
 describe('QuestionService', () => {
   let service: QuestionService;
@@ -18,6 +19,7 @@ describe('QuestionService', () => {
         PineconeService,
         EmbeddingService,
         Pinecone,
+        RerankerService
       ],
     }).compile();
 

@@ -1,12 +1,12 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { Pinecone } from '@pinecone-database/pinecone';
-import { EmbeddingService } from 'src/embedding/embedding.service';
+import { EmbeddingService } from 'src/embedding/embedding.service';import { RerankerService } from 'src/reranker/reranker.service';
 
 @Injectable()
 export class PineconeService {
   constructor(
     private pineconeClient: Pinecone,
-    private readonly embeddingService: EmbeddingService,
+    private readonly embeddingService: EmbeddingService,    
   ) {}
 
   private readonly indexName = 'questions-index';
@@ -51,6 +51,14 @@ export class PineconeService {
       const embedding =
         await this.embeddingService.getEmbeddingFromHuggingFace(queryText);
 
+      if (
+        !Array.isArray(embedding) ||
+        embedding.length === 0 ||
+        embedding.some((val) => typeof val !== 'number')
+      ) {
+        throw new Error('Invalid embedding data received from HuggingFace');
+      }
+
       const queryRequest = {
         vector: embedding,
         topK,
@@ -60,8 +68,8 @@ export class PineconeService {
 
       const index = this.pineconeClient.Index(this.indexName);
       const queryResponse = await index.query(queryRequest);
-
       const matches = queryResponse.matches;
+      
       return matches;
     } catch (error) {
       console.log(error);

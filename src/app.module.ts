@@ -12,9 +12,18 @@ import { EmbeddingService } from './embedding/embedding.service';
 import { PineconeService } from './pinecone/pinecone.service';
 import { AiService } from './ai/ai.service';
 import { Pinecone } from '@pinecone-database/pinecone';
+import { RerankerService } from './reranker/reranker.service';
+import { CohereClient } from 'cohere-ai/Client';
 
 @Module({
-  imports: [AuthModule, UserModule, QuestionModule, AnswerModule, EditModule, VoteModule],
+  imports: [
+    AuthModule,
+    UserModule,
+    QuestionModule,
+    AnswerModule,
+    EditModule,
+    VoteModule,
+  ],
   controllers: [AppController],
   providers: [
     AppService,
@@ -25,7 +34,9 @@ import { Pinecone } from '@pinecone-database/pinecone';
     AiService,
     EmbeddingService,
     PineconeService,
-    Pinecone
+    Pinecone,
+    RerankerService,
+    CohereClient,
   ],
 })
 export class AppModule {}
