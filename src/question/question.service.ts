@@ -4,6 +4,8 @@ import { CreateQuestionDto } from './dto/create-question.dto';
 import { Prisma, Question } from '@prisma/client';
 import { UpdateQuestionDto } from './dto/update-question.dto';
 import { GetQuestionDto } from './dto/get-question.dto';
+import { AiService } from 'src/ai/ai.service';
+import { PineconeService } from 'src/pinecone/pinecone.service';
 
 interface CreateData {
   title: string;
@@ -17,16 +19,41 @@ interface UpdateData {
 
 @Injectable()
 export class QuestionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly aiService: AiService,
+    private readonly pineconeService: PineconeService,
+  ) {}
 
-  async create(CreateQuestionDto: CreateQuestionDto, req): Promise<Question> {
+  async create(CreateQuestionDto: CreateQuestionDto, req) {
     const userId = req.user.id;
     const data: CreateData = {
       ...CreateQuestionDto,
       userId: userId,
     };
 
-    return await this.prisma.question.create({ data });
+    const question = await this.prisma.question.create({ data });
+
+    setImmediate(async () => {
+      try {
+        const prompt = `###title: ${question.title} \n ###body: ${question.body}`;
+        const answer = await this.aiService.generateAnswer(prompt);
+  
+        await this.prisma.answer.create({
+          data: {
+            body: answer,
+            userId: userId,
+            questionId: question.id,
+          },
+        });
+  
+        await this.pineconeService.upsert(`${question.id}`, question.body);
+      } catch (error) {
+        console.error('Error processing background task:', error);
+      }
+    });
+
+    return question;
   }
 
   async findAll(query: GetQuestionDto) {
